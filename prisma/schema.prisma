@@ -30,10 +30,12 @@ model User {
 model Document {
   id          String   @id @default(cuid())
   title       String
-  description String
+  description String   @db.Text
   category    String
   imageUrl    String?
   imagePath   String?
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

@@ -83,6 +83,8 @@ Thumbs.db
 
 # Uploads directory (contains user uploaded files)
 uploads/
+# But not the API route
+!src/app/api/uploads/
 
 # Docker volumes
 postgres_data/
