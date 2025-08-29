@@ -1,7 +1,31 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.25.0
+version: v1.25.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
+  'SNYK-JS-SHARP-8163938':
+    - '*':
+        reason: >-
+          LGPL-3.0 license issue in Sharp library dependency. This is a
+          development dependency for image processing and does not affect
+          production security. Sharp is a widely used, well-maintained library
+          for image processing in Node.js applications.
+        expires: '2025-09-28T22:08:16.000Z'
+  'SNYK-JS-SHARP-8163937':
+    - '*':
+        reason: >-
+          LGPL-3.0 license issue in Sharp library dependency. This is a
+          development dependency for image processing and does not affect
+          production security. Sharp is a widely used, well-maintained library
+          for image processing in Node.js applications.
+        expires: '2025-09-28T22:08:16.000Z'
+  'SNYK-JS-SHARP-8163936':
+    - '*':
+        reason: >-
+          LGPL-3.0 license issue in Sharp library dependency. This is a
+          development dependency for image processing and does not affect
+          production security. Sharp is a widely used, well-maintained library
+          for image processing in Node.js applications.
+        expires: '2025-09-28T22:08:16.000Z'
   'snyk:lic:npm:img:sharp-libvips-linuxmusl-x64:LGPL-3.0':
     - '*':
         reason: LGPL-3.0 license is acceptable for this internal tool
