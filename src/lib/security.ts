@@ -5,15 +5,16 @@ import { authOptions } from './auth'
 export interface SecurityValidationResult {
   isValid: boolean
   error?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   user?: any
 }
 
 /**
  * Validates that the user is authenticated
  */
-export async function validateAuthentication(request: NextRequest): Promise<SecurityValidationResult> {
+export async function validateAuthentication(_request: NextRequest): Promise<SecurityValidationResult> {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions) as any
     
     if (!session?.user) {
       return {
@@ -26,7 +27,7 @@ export async function validateAuthentication(request: NextRequest): Promise<Secu
       isValid: true,
       user: session.user
     }
-  } catch (error) {
+  } catch (_error) {
     return {
       isValid: false,
       error: 'Authentication validation failed'

@@ -23,7 +23,7 @@ interface DocumentBrowserProps {
   refreshTrigger?: number
 }
 
-export function DocumentBrowser({ onRefresh, refreshTrigger }: DocumentBrowserProps) {
+export default function DocumentBrowser({ onRefresh: _onRefresh }: DocumentBrowserProps) {
   const { data: session } = useSession()
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
@@ -103,7 +103,7 @@ export function DocumentBrowser({ onRefresh, refreshTrigger }: DocumentBrowserPr
 
   // Find first category with search results
   const searchResultCategory = searchQuery && filteredDocuments.length > 0
-    ? filteredDocuments[0].category
+    ? Object.keys(filteredDocuments).find(category => filteredDocuments[category].length > 0)
     : activeTab
 
   if (loading) {
@@ -320,6 +320,7 @@ function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProp
             
             {document.imageUrl && (
               <div className="mt-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={document.imageUrl}
                   alt={document.title}

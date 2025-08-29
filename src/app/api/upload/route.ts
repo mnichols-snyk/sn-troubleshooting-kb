@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions) as any
     if (!session || session.user.role !== 'EDITOR') {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
       url: fileUrl,
       filename: filename,
     })
-  } catch (uploadError) {
-    console.error('Upload error:', uploadError)
+  } catch (_error) {
+    console.error('Upload error:', _error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

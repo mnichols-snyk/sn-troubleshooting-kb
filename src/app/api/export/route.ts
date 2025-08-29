@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx'
 
@@ -6,9 +6,6 @@ export async function GET() {
   try {
     // Fetch all published documents
     const documents = await prisma.document.findMany({
-      where: {
-        published: true,
-      },
       include: {
         author: {
           select: {
@@ -19,7 +16,6 @@ export async function GET() {
       },
       orderBy: [
         { category: 'asc' },
-        { sortOrder: 'asc' },
         { createdAt: 'desc' },
       ],
     })
@@ -94,7 +90,7 @@ export async function GET() {
           new Paragraph({
             children: [
               new TextRun({
-                text: `Created by: ${doc.author.name || doc.author.email} on ${new Date(doc.createdAt).toLocaleDateString()}`,
+                text: `Created by: ${doc.author?.name || doc.author?.email || 'Unknown'} on ${new Date(doc.createdAt).toLocaleDateString()}`,
                 italics: true,
                 size: 20, // 10pt font
               }),
