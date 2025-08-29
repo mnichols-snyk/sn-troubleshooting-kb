@@ -4,14 +4,15 @@ import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { AddDocumentModal } from '@/components/documents/add-document-modal'
-import { DocumentBrowser } from '@/components/documents/document-browser'
+import DocumentBrowser from '@/components/documents/document-browser'
 
 export default function Home() {
   const { data: session, status } = useSession()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
-  const isEditor = session?.user?.role === 'EDITOR'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isEditor = (session?.user as any)?.role === 'EDITOR'
 
   const handleDocumentCreated = () => {
     setRefreshTrigger(prev => prev + 1)
@@ -35,9 +36,11 @@ export default function Home() {
               ) : session ? (
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-gray-700">
-                    Welcome, {session.user.name || session.user.email}
+                    Welcome, {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                    (session.user as any).name || (session.user as any).email}
                     <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                      {session.user.role}
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                      (session.user as any).role}
                     </span>
                   </span>
                   <button

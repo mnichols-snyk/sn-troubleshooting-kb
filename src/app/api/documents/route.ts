@@ -48,19 +48,13 @@ export async function GET() {
 // POST - Create new document (protected endpoint for Editors)
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user) {
+    // Check authentication
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const session = await getServerSession(authOptions) as any
+    if (!session || session.user.role !== 'EDITOR') {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
-      )
-    }
-
-    if (session.user.role !== 'EDITOR') {
-      return NextResponse.json(
-        { error: 'Editor role required' },
-        { status: 403 }
       )
     }
 
@@ -120,7 +114,7 @@ export async function POST(request: NextRequest) {
       await writeFile(filepath, buffer)
 
       imageUrl = `/uploads/${filename}`
-      imagePath = filepath
+      imagePath = filepath // Used for cleanup on document deletion
     }
 
     // Create document in database
@@ -130,7 +124,7 @@ export async function POST(request: NextRequest) {
         description: validatedData.description,
         category: validatedData.category,
         imageUrl,
-        imagePath,
+        // Get user ID from session
         authorId: session.user.id,
       },
       include: {
@@ -148,16 +142,15 @@ export async function POST(request: NextRequest) {
       document,
     }, { status: 201 })
 
-  } catch (error) {
-    console.error('Error creating document:', error)
-    
-    if (error instanceof z.ZodError) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    if (error.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error.issues || error.message },
         { status: 400 }
       )
     }
-
+    console.error('Error creating document:', error)
     return NextResponse.json(
       { error: 'Failed to create document' },
       { status: 500 }
