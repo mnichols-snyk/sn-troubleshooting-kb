@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Snyk ServiceNow Troubleshooting Knowledge Base
 
-## Getting Started
+A dynamic, secure, and collaborative web application for managing Snyk ServiceNow integration troubleshooting documentation.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Role-Based Authentication**: Secure access with Editor and Viewer roles
+- **Dynamic Content Management**: CRUD operations for documentation entries
+- **File Upload Support**: Image uploads for documentation
+- **Search Functionality**: Fast search across all content
+- **Responsive Design**: Modern UI with Tailwind CSS
+- **Docker Support**: Containerized PostgreSQL database
+
+## Technology Stack
+
+- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, NextAuth.js
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js with Credentials provider
+- **File Storage**: Local filesystem with Docker volumes
+- **Deployment**: Docker Compose for local development
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- Docker and Docker Compose
+- npm or yarn
+
+### Installation
+
+1. **Clone and setup the project**:
+   ```bash
+   cd /path/to/sn-troubleshooting-kb
+   npm install
+   ```
+
+2. **Start the database**:
+   ```bash
+   npm run docker:up
+   ```
+
+3. **Setup the database schema**:
+   ```bash
+   npm run setup
+   ```
+
+4. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+
+5. **Access the application**:
+   - Open [http://localhost:3000](http://localhost:3000)
+   - Sign up for an account (choose Editor role to manage content)
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run docker:up` - Start PostgreSQL container
+- `npm run docker:down` - Stop PostgreSQL container
+- `npm run db:generate` - Generate Prisma client
+- `npm run db:push` - Push schema to database
+- `npm run db:migrate` - Run database migrations
+- `npm run db:studio` - Open Prisma Studio
+- `npm run setup` - Generate client and push schema
+
+## User Roles
+
+- **Editor**: Can create, read, update, and delete documentation entries
+- **Viewer**: Read-only access to all documentation
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── api/          # API routes
+│   ├── auth/         # Authentication pages
+│   └── page.tsx      # Main application page
+├── components/       # Reusable components
+├── lib/             # Utilities and configurations
+└── types/           # TypeScript type definitions
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The `.env` file contains:
+- `DATABASE_URL` - PostgreSQL connection string
+- `NEXTAUTH_SECRET` - NextAuth.js secret key
+- `NEXTAUTH_URL` - Application URL
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Sprint 1 Completed Features
 
-## Learn More
+✅ **FE-101**: Next.js project with TypeScript and Tailwind CSS  
+✅ **BE-101**: Docker Compose PostgreSQL configuration  
+✅ **BE-102**: Database schema with Users and Documents tables  
+✅ **BE-103**: NextAuth.js authentication with Credentials provider  
+✅ **FE-102**: Login and registration pages  
+✅ **BE-104**: File upload service for images  
 
-To learn more about Next.js, take a look at the following resources:
+## Next Steps (Sprint 2)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Dynamic content management system
+- Document CRUD operations
+- Public API for fetching documents
+- Real-time UI updates
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Security
 
-## Deploy on Vercel
+- Role-based access control (RBAC)
+- Input validation with Zod
+- Secure file uploads with type and size validation
+- Password hashing with bcryptjs
+- Protected API routes for authenticated users only
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Support
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For questions or issues, contact the Snyk support team.

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snyk ServiceNow AppVR Integration Troubleshooting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #191A2E; /* Snyk dark background */
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-btn.active {
+            border-color: #818cf8; /* indigo-400 */
+            color: white;
+        }
+        /* Simple animation for accordion */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white">Snyk & ServiceNow AppVR Integration</h1>
+            <p class="text-lg text-indigo-300 mt-2">Your go-to guide for installation, troubleshooting, and known behaviors.</p>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="mb-8 max-w-2xl mx-auto">
+            <input type="text" id="searchInput" onkeyup="searchContent()" placeholder="Search for topics like 'OAuth failures'..." class="w-full p-4 bg-slate-800 border border-slate-600 text-white placeholder-slate-400 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+        </div>
+
+        <main id="mainContent" class="bg-slate-900/50 backdrop-blur-sm ring-1 ring-white/10 p-6 md:p-8 rounded-2xl shadow-lg">
+            <!-- Tab Navigation -->
+            <div id="tab-container" class="flex border-b border-slate-700 mb-6">
+                <button class="tab-btn active text-lg font-medium py-3 px-6 border-b-2 border-transparent transition hover:text-white" data-tab="installation">Installation</button>
+                <button class="tab-btn text-lg font-medium py-3 px-6 border-b-2 border-transparent text-slate-400 transition hover:text-white" data-tab="troubleshooting">Troubleshooting</button>
+                <button class="tab-btn text-lg font-medium py-3 px-6 border-b-2 border-transparent text-slate-400 transition hover:text-white" data-tab="known-behaviors">Known Behaviors</button>
+            </div>
+
+            <!-- Installation Section -->
+            <section id="installation" class="tab-content active searchable-section">
+                <div class="space-y-6">
+                    <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>Pre-Requisites</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                            <ul class="list-disc list-inside space-y-2">
+                                <li>User should have an Enterprise license to the Snyk Platform.</li>
+                                <li>Your ServiceNow Redirect URL ("https://YOUR-INSTANCE.service-now.com/oauth_redirect.do") must be set up on the Snyk side.</li>
+                                <li><strong>Action Required:</strong> Contact servicenow@snyk.io to register your instance for the Snyk app. This is mandatory for new installations.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>ServiceNow Plugins</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <p class="mb-2">The following ServiceNow plugin must be activated: <strong>Vulnerability Response (com.snc.sn_vul) - min version(24.1.5)</strong></p>
+                           <ol class="list-decimal list-inside space-y-2">
+                               <li>Log in to your instance with system admin credentials.</li>
+                               <li>Navigate to "System Definition," and under it, select "Plugins".</li>
+                               <li>Search for and install the plugin.</li>
+                           </ol>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>Application Installation from ServiceNow Store</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li>Go to the ServiceNow Store: <a href="https://store.servicenow.com" class="text-indigo-400 hover:underline">https://store.servicenow.com</a>.</li>
+                                <li>Search for "Snyk Security for Application Vulnerability Response".</li>
+                                <li>Click "Get" and enter your ServiceNow ID credentials.</li>
+                                <li>In your instance, navigate to Applications > All Available Applications > All.</li>
+                                <li>Find the application and click "Install".</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>Configuration: Snyk Base URL Change</span>
+                             <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <p>Snyk has migrated hosting for new customers. The default URL in the app is now the AWS URL: <code>https://app.us.snyk.io</code>.</p>
+                           <p class="mt-2"><strong>If you are an existing Snyk customer on GCP</strong>, you must update the base URL. Log in to your Snyk account and check the URL. If it's <code>app.snyk.io</code>, you are on GCP.</p>
+                           <p class="mt-2"><strong>To update:</strong> Open Global Settings in the Snyk app in ServiceNow and change the Base URL to <code>app.snyk.io</code>.</p>
+                        </div>
+                    </div>
+                     <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>Generate REST/OAuth Token</span>
+                             <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <ol class="list-decimal list-inside space-y-2">
+                               <li>Navigate to "Snyk Security for AppVR" > "Configuration" > "REST/OAuth Token".</li>
+                               <li>Click on "Get OAuth Token".</li>
+                               <li>You will be redirected to the Snyk App Authorization page.</li>
+                               <li>Provide access to all organizations or a selected organization.</li>
+                               <li>Click "Grant app access" to successfully authorize.</li>
+                           </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Troubleshooting Section -->
+            <section id="troubleshooting" class="tab-content searchable-section">
+                <div class="space-y-6">
+                    <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>OAuth failures: Unable to generate the token</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                            <p>If you encounter an "Invalid Redirect URL" error or general token generation failures:</p>
+                            <ul class="list-disc list-inside mt-2 space-y-2">
+                                <li><strong>Verify Redirect URL:</strong> Ensure your instance redirect URL (<code>https://YOUR-INSTANCE.service-now.com/oauth_redirect.do</code>) has been provided to the Snyk team by emailing servicenow@snyk.io.</li>
+                                <li><strong>Run Fix Script:</strong> Navigate to "System Definition" > "Fix Scripts". Find and run the "Update Credentials" script.</li>
+                                <li><strong>Check Application Registry Permissions:</strong>
+                                    <ol class="list-decimal list-inside ml-4 mt-2">
+                                        <li>Go to "System OAuth" > "Application Registry".</li>
+                                        <li>Right-click the header, select "Configure" > "Table".</li>
+                                        <li>Under "Application Access", check the "Can Update" box and save.</li>
+                                    </ol>
+                                </li>
+                                <li>Attempt to generate the token again after performing these steps.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>Integration is failing, but token was generated</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <p>The integration run can fail if a value is assigned in the "Run as" field in the integration configuration. Ensure this field is empty for all Snyk integrations.</p>
+                        </div>
+                    </div>
+                     <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>Getting Reconcile-related errors while running integration</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <p>This error occurs when multiple VR integrations are running simultaneously. Navigate to <code>sn_sec_cmn_background_job.list</code> and ensure all jobs are complete. Wait for important jobs to finish or mark unimportant ones as "complete" using a script if necessary.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>Unable to ignore an issue from ServiceNow to Snyk (403 Error)</span>
+                           <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <p>In the Snyk platform, at the organization level, go to "Settings" > "Ignores". Under "Ability to ignore an issue...", you must select "All users in any environment".</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>Unable to Install from ServiceNow Store</span>
+                           <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <p>First, verify you have the system administrator (admin) role. Then, ensure the 'Vulnerability Response' plugin is installed before attempting to install the Snyk application.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>User Deletes Default Records (Application Registry, REST Message, etc.)</span>
+                           <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <p>If a user deletes the Application Registry, REST Message, or any of the default Integration records, the solution is to uninstall and then reinstall the Snyk application from the ServiceNow store.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>Unable to see CVE & CWE in Third-Party Records</span>
+                           <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <p>Navigate to Application Vulnerability Response > Libraries > Third-Party. Open a third-party record, then use the context menu (hamburger icon) to navigate to Configure > Related Lists. Add 'CVE' and 'CWE' from the available slushbucket to the selected list and save.</p>
+                        </div>
+                    </div>
+                     <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>"Organizations not found" or Permission Errors During Auth</span>
+                           <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <p>The Snyk App can only be authorized for a single organization or for all organizations within a group. If you attempt to authorize for multiple specific orgs (without using the "All Orgs" option), the authorization will only succeed for the last org selected.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Known Behaviors Section -->
+            <section id="known-behaviors" class="tab-content searchable-section">
+                <div class="space-y-6">
+                    <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>Integration Failures on Concurrent Runs</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                            <p>Due to ServiceNow's OAuth2 mechanism, Snyk integration runs can fail if multiple jobs are executed concurrently as the same user (e.g., VR.system). Avoid manually executing a Snyk import job when one is already in process.</p>
+                        </div>
+                    </div>
+                     <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>AVIT State Not Updating from "Deferred" to "Open"</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <p>If an AVIT is in a "Deferred" state, ServiceNow does not allow its state to be automatically changed to "Open" by the integration. This must be done manually.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>Delays in Reflecting Ignored Issues</span>
+                            <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                            <p>Recently ignored SCA or IaC issues on the Snyk side could take up to <strong>~5 hours</strong> to reflect in the SCA V1 API and thus in ServiceNow.</p>
+                        </div>
+                    </div>
+                     <div class="accordion-item">
+                        <button class="accordion-header w-full text-left text-xl font-medium text-white p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition flex justify-between items-center">
+                            <span>"Mark as False positive" or "Request Exception" for IaC issues</span>
+                           <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="accordion-content p-4 bg-slate-900/80 border border-t-0 border-slate-700 rounded-b-lg">
+                           <p>If you are using the REST mechanism for fetching IaC issues, the integration does not support setting an ignore on the Snyk platform via these actions.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="text-center mt-8 text-slate-400">
+            <p>&copy; 2025 Snyk Support. Information based on Snyk Integration with ServiceNow User Guide 3.2.0.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabContainer = document.getElementById('tab-container');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+
+            tabContainer.addEventListener('click', (e) => {
+                const clickedTab = e.target.closest('.tab-btn');
+                if (!clickedTab) return;
+
+                const tabId = clickedTab.dataset.tab;
+                
+                tabBtns.forEach(btn => btn.classList.remove('active'));
+                clickedTab.classList.add('active');
+
+                tabContents.forEach(content => {
+                    if (content.id === tabId) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+            });
+
+
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = header.querySelector('svg');
+
+                header.addEventListener('click', () => {
+                    const isExpanded = content.style.maxHeight;
+                    // We don't close others in a tabbed view to allow multiple to be open
+                    if (isExpanded) {
+                        content.style.maxHeight = null;
+                        icon.classList.remove('rotate-180');
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.classList.add('rotate-180');
+                    }
+                });
+            });
+        });
+
+        function searchContent() {
+            let input = document.getElementById('searchInput');
+            let filter = input.value.toUpperCase();
+            let allAccordions = document.querySelectorAll('.accordion-item');
+            let found = false;
+
+            if (filter.length < 3) {
+                 allAccordions.forEach(item => {
+                    item.style.display = "";
+                 });
+                 return;
+            }
+
+            allAccordions.forEach(item => {
+                let contentToSearch = item.textContent || item.innerText;
+                if (contentToSearch.toUpperCase().indexOf(filter) > -1) {
+                    item.style.display = "";
+                    if (!found) { // only switch tab for the first found item
+                        const parentTabContent = item.closest('.tab-content');
+                        if (parentTabContent && !parentTabContent.classList.contains('active')) {
+                            const tabId = parentTabContent.id;
+                            document.querySelector(`.tab-btn[data-tab="${tabId}"]`).click();
+                        }
+                        found = true;
+                    }
+                } else {
+                    item.style.display = "none";
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
+

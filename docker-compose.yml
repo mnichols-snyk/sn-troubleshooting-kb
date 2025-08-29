@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: sn-kb-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sn_troubleshooting_kb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./uploads:/app/uploads
+    networks:
+      - sn-kb-network
+
+  app:
+    build: .
+    container_name: sn-kb-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/sn_troubleshooting_kb
+      - NEXTAUTH_SECRET=your-secret-key-change-in-production
+      - NEXTAUTH_URL=http://localhost:3000
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - postgres
+    networks:
+      - sn-kb-network
+
+volumes:
+  postgres_data:
+
+networks:
+  sn-kb-network:
+    driver: bridge
