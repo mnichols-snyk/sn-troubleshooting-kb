@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { EditDocumentModal } from './edit-document-modal'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 interface Document {
   id: string
@@ -28,6 +30,8 @@ export function DocumentBrowser({ onRefresh, refreshTrigger }: DocumentBrowserPr
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeTab, setActiveTab] = useState<string>('')
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null)
+  const [deletingDocument, setDeletingDocument] = useState<Document | null>(null)
 
   const fetchDocuments = async () => {
     try {
@@ -57,6 +61,25 @@ export function DocumentBrowser({ onRefresh, refreshTrigger }: DocumentBrowserPr
   useEffect(() => {
     fetchDocuments()
   }, [refreshTrigger])
+
+  const handleDelete = async (document: Document) => {
+    try {
+      const response = await fetch(`/api/documents/${document.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document')
+      }
+
+      // Refresh the documents list
+      fetchDocuments()
+      setDeletingDocument(null)
+    } catch (err) {
+      console.error('Error deleting document:', err)
+      // Could add error toast here
+    }
+  }
 
   // Group documents by category
   const documentsByCategory = documents.reduce((acc, doc) => {
@@ -191,17 +214,52 @@ export function DocumentBrowser({ onRefresh, refreshTrigger }: DocumentBrowserPr
           activeTab && documentsByCategory[activeTab] && (
             <div>
               {documentsByCategory[activeTab].map((doc) => (
-                <DocumentCard key={doc.id} document={doc} />
+                <DocumentCard 
+                  key={doc.id} 
+                  document={doc} 
+                  onEdit={() => setEditingDocument(doc)}
+                  onDelete={() => setDeletingDocument(doc)}
+                  isEditor={session?.user?.role === 'EDITOR'}
+                />
               ))}
             </div>
           )
         )}
       </div>
+
+      {/* Edit Modal */}
+      <EditDocumentModal
+        isOpen={!!editingDocument}
+        onClose={() => setEditingDocument(null)}
+        onSuccess={() => {
+          fetchDocuments()
+          setEditingDocument(null)
+        }}
+        document={editingDocument}
+      />
+
+      {/* Delete Confirmation */}
+      <ConfirmationDialog
+        isOpen={!!deletingDocument}
+        onClose={() => setDeletingDocument(null)}
+        onConfirm={() => deletingDocument && handleDelete(deletingDocument)}
+        title="Delete Document"
+        message={`Are you sure you want to delete "${deletingDocument?.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        isDestructive={true}
+      />
     </div>
   )
 }
 
-function DocumentCard({ document }: { document: Document }) {
+interface DocumentCardProps {
+  document: Document
+  onEdit?: () => void
+  onDelete?: () => void
+  isEditor?: boolean
+}
+
+function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
@@ -212,16 +270,46 @@ function DocumentCard({ document }: { document: Document }) {
       >
         <div className="flex justify-between items-center">
           <h3 className="font-medium text-gray-900">{document.title}</h3>
-          <svg
-            className={`h-5 w-5 text-gray-500 transform transition-transform ${
-              isExpanded ? 'rotate-180' : ''
-            }`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          <div className="flex items-center space-x-2">
+            {isEditor && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onEdit?.()
+                  }}
+                  className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                  title="Edit document"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete?.()
+                  }}
+                  className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                  title="Delete document"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </>
+            )}
+            <svg
+              className={`h-5 w-5 text-gray-500 transform transition-transform ${
+                isExpanded ? 'rotate-180' : ''
+              }`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
         </div>
       </button>
       
