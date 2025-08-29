@@ -1,10 +1,10 @@
-import { type NextAuthOptions } from 'next-auth'
-import { getServerSession } from 'next-auth/next'
+import NextAuth, { type NextAuthOptions, getServerSession } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { sanitizeInput } from './security'
 
 const loginSchema = z.object({
   email: z.string().email(),
