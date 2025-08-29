@@ -5,7 +5,10 @@ const prisma = new PrismaClient()
 
 async function main() {
   // Create admin user
-  const defaultPassword = process.env.ADMIN_PASSWORD || 'admin123'
+  const defaultPassword = process.env.ADMIN_PASSWORD
+  if (!defaultPassword) {
+    throw new Error('ADMIN_PASSWORD environment variable is required for seeding')
+  }
   const hashedPassword = await bcrypt.hash(defaultPassword, 10)
   
   const adminUser = await prisma.user.upsert({
@@ -19,7 +22,19 @@ async function main() {
     },
   })
 
+  const markUser = await prisma.user.upsert({
+    where: { email: 'mark.nichols@snyk.io' },
+    update: {},
+    create: {
+      email: 'mark.nichols@snyk.io',
+      name: 'Mark Nichols',
+      password: hashedPassword,
+      role: 'EDITOR',
+    },
+  })
+
   console.log('Created admin user:', adminUser.email)
+  console.log('Created admin user:', markUser.email)
 
   // Installation documents
   const installationDocs = [

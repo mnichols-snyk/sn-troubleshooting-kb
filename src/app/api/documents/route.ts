@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { validateDocumentUniqueness } from '@/lib/duplicate-validation'
 import { z } from 'zod'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
@@ -72,6 +73,24 @@ export async function POST(request: NextRequest) {
       description,
       category,
     })
+
+    // Check for duplicates before proceeding
+    const duplicateValidation = await validateDocumentUniqueness(
+      validatedData.title,
+      validatedData.description,
+      validatedData.category
+    )
+
+    if (!duplicateValidation.isValid) {
+      return NextResponse.json(
+        { 
+          error: duplicateValidation.error,
+          suggestions: duplicateValidation.suggestions,
+          isDuplicateError: true
+        },
+        { status: 409 } // Conflict status code
+      )
+    }
 
     let imageUrl: string | null = null
     let imagePath: string | null = null

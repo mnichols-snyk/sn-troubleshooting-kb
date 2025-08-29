@@ -23,7 +23,7 @@ interface DocumentBrowserProps {
   refreshTrigger?: number
 }
 
-export default function DocumentBrowser({ onRefresh: _onRefresh }: DocumentBrowserProps) {
+export default function DocumentBrowser({ onRefresh: _onRefresh, refreshTrigger }: DocumentBrowserProps) {
   const { data: session } = useSession()
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
@@ -163,26 +163,31 @@ export default function DocumentBrowser({ onRefresh: _onRefresh }: DocumentBrows
           placeholder="Search documentation..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          className="snyk-input block w-full pl-10 pr-3"
+          style={{color: 'var(--snyk-gray-900)', background: 'var(--snyk-white)'}}
         />
       </div>
 
       {/* Category Tabs */}
       {!searchQuery && categories.length > 0 && (
-        <div className="border-b border-gray-200">
+        <div style={{borderBottom: '1px solid var(--snyk-gray-200)'}}>
           <nav className="-mb-px flex space-x-8">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveTab(category)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === category
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'text-white'
+                    : 'border-transparent hover:border-gray-300'
                 }`}
+                style={{
+                  borderBottomColor: activeTab === category ? 'var(--snyk-primary)' : 'transparent',
+                  color: activeTab === category ? 'var(--snyk-primary)' : 'var(--snyk-gray-500)'
+                }}
               >
                 {category}
-                <span className="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">
+                <span className="ml-2 snyk-badge snyk-badge-primary">
                   {documentsByCategory[category]?.length || 0}
                 </span>
               </button>
@@ -263,13 +268,18 @@ function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProp
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="snyk-card mb-4 overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition-colors"
+        className="w-full px-4 py-3 text-left transition-colors"
+        style={{
+          background: 'var(--snyk-gray-50)'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--snyk-gray-100)'}
+        onMouseLeave={(e) => e.currentTarget.style.background = 'var(--snyk-gray-50)'}
       >
         <div className="flex justify-between items-center">
-          <h3 className="font-medium text-gray-900">{document.title}</h3>
+          <h3 className="font-medium" style={{color: 'var(--snyk-gray-900)'}}>{document.title}</h3>
           <div className="flex items-center space-x-2">
             {isEditor && (
               <>
@@ -278,7 +288,10 @@ function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProp
                     e.stopPropagation()
                     onEdit?.()
                   }}
-                  className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                  className="p-1 transition-colors"
+                  style={{color: 'var(--snyk-gray-400)'}}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--snyk-primary)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--snyk-gray-400)'}
                   title="Edit document"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -290,7 +303,10 @@ function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProp
                     e.stopPropagation()
                     onDelete?.()
                   }}
-                  className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                  className="p-1 transition-colors"
+                  style={{color: 'var(--snyk-gray-400)'}}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--snyk-error)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--snyk-gray-400)'}
                   title="Delete document"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -300,9 +316,10 @@ function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProp
               </>
             )}
             <svg
-              className={`h-5 w-5 text-gray-500 transform transition-transform ${
+              className={`h-5 w-5 transform transition-transform ${
                 isExpanded ? 'rotate-180' : ''
               }`}
+              style={{color: 'var(--snyk-gray-500)'}}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -314,9 +331,9 @@ function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProp
       </button>
       
       {isExpanded && (
-        <div className="px-4 py-3 bg-white">
+        <div className="px-4 py-3" style={{background: 'var(--snyk-white)'}}>
           <div className="prose prose-sm max-w-none">
-            <p className="text-gray-700 whitespace-pre-wrap">{document.description}</p>
+            <p className="whitespace-pre-wrap" style={{color: 'var(--snyk-gray-700)'}}>{document.description}</p>
             
             {document.imageUrl && (
               <div className="mt-4">
@@ -324,13 +341,14 @@ function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProp
                 <img
                   src={document.imageUrl}
                   alt={document.title}
-                  className="max-w-full h-auto rounded-md border border-gray-200"
+                  className="max-w-full h-auto rounded-md"
+                  style={{border: '1px solid var(--snyk-gray-200)'}}
                 />
               </div>
             )}
           </div>
           
-          <div className="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-500">
+          <div className="mt-4 pt-3 text-xs" style={{borderTop: '1px solid var(--snyk-gray-100)', color: 'var(--snyk-gray-500)'}}>
             Created by {document.author.name || document.author.email} on{' '}
             {new Date(document.createdAt).toLocaleDateString()}
           </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { validateDocumentUniqueness } from '@/lib/duplicate-validation'
 import { z } from 'zod'
 import { writeFile, mkdir, unlink } from 'fs/promises'
 import { join } from 'path'
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT - Update document
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions) as any
 
     if (!session?.user) {
       return NextResponse.json(
@@ -63,7 +64,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    if (session.user.role !== 'EDITOR') {
+    if (!session.user.role || session.user.role !== 'EDITOR') {
       return NextResponse.json(
         { error: 'Editor role required' },
         { status: 403 }
@@ -99,6 +100,25 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       description,
       category,
     })
+
+    // Check for duplicates before proceeding (exclude current document)
+    const duplicateValidation = await validateDocumentUniqueness(
+      validatedData.title,
+      validatedData.description,
+      validatedData.category,
+      id // Exclude current document from duplicate check
+    )
+
+    if (!duplicateValidation.isValid) {
+      return NextResponse.json(
+        { 
+          error: duplicateValidation.error,
+          suggestions: duplicateValidation.suggestions,
+          isDuplicateError: true
+        },
+        { status: 409 } // Conflict status code
+      )
+    }
 
     let imageUrl = existingDocument.imageUrl
     let imagePath = existingDocument.imagePath
@@ -194,7 +214,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error.issues },
         { status: 400 }
       )
     }
@@ -209,7 +229,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE - Delete document
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions) as any
 
     if (!session?.user) {
       return NextResponse.json(
@@ -218,7 +238,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    if (session.user.role !== 'EDITOR') {
+    if (!session.user.role || session.user.role !== 'EDITOR') {
       return NextResponse.json(
         { error: 'Editor role required' },
         { status: 403 }
