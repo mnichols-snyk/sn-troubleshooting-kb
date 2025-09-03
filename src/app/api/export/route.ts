@@ -115,7 +115,7 @@ export async function GET() {
     const buffer = await Packer.toBuffer(doc)
 
     // Return the document as a download
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as BodyInit, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'Content-Disposition': `attachment; filename="snyk-troubleshooting-kb-${new Date().toISOString().split('T')[0]}.docx"`,

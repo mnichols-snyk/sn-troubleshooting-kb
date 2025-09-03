@@ -149,7 +149,7 @@ export default function DocumentBrowser({ onRefresh: _onRefresh, refreshTrigger 
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No documents yet</h3>
         <p className="text-gray-500">
-          {(session?.user as any)?.role === 'EDITOR' 
+          {session?.user?.role === 'EDITOR' 
             ? 'Create your first document using the + button above.'
             : 'Check back later for troubleshooting documentation.'
           }
@@ -220,7 +220,7 @@ export default function DocumentBrowser({ onRefresh: _onRefresh, refreshTrigger 
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">No documents found matching "{searchQuery}"</p>
+              <p className="text-gray-500">No documents found matching &quot;{searchQuery}&quot;</p>
             </div>
           )
         ) : (
@@ -233,7 +233,7 @@ export default function DocumentBrowser({ onRefresh: _onRefresh, refreshTrigger 
                   document={doc} 
                   onEdit={() => setEditingDocument(doc)}
                   onDelete={() => setDeletingDocument(doc)}
-                  isEditor={(session?.user as any)?.role === 'EDITOR'}
+                  isEditor={session?.user?.role === 'EDITOR'}
                 />
               ))}
             </div>

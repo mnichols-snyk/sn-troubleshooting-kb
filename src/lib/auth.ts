@@ -1,9 +1,6 @@
-import NextAuth from 'next-auth'
 export { getServerSession } from 'next-auth/next'
-import type { JWT } from 'next-auth/jwt'
-import type { Session, User } from 'next-auth'
+import type { AuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
@@ -13,8 +10,7 @@ const loginSchema = z.object({
   password: z.string().min(6),
 })
 
-export const authOptions = {
-  adapter: PrismaAdapter(prisma),
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -56,18 +52,16 @@ export const authOptions = {
     strategy: 'jwt' as const,
   },
   callbacks: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }) {
       if (user) {
-        token.role = user.role
+        token.role = (user as { role?: string }).role
       }
       return token
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({ session, token }: any) {
-      if (token) {
-        session.user.id = token.sub
-        session.user.role = token.role
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.sub as string
+        session.user.role = token.role as string
       }
       return session
     },

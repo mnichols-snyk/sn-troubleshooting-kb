@@ -14,7 +14,7 @@ export interface SecurityValidationResult {
  */
 export async function validateAuthentication(_request: NextRequest): Promise<SecurityValidationResult> {
   try {
-    const session = await getServerSession(authOptions) as any
+    const session = await getServerSession(authOptions)
     
     if (!session?.user) {
       return {

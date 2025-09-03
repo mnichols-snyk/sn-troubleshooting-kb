@@ -43,6 +43,7 @@ export interface DuplicateCheckResult {
   similarDocuments: Array<{
     id: string
     title: string
+    description: string
     category: string
     similarity: number
   }>
@@ -75,6 +76,7 @@ export async function checkForDuplicates(
   const similarDocuments: Array<{
     id: string
     title: string
+    description: string
     category: string
     similarity: number
   }> = []
@@ -99,6 +101,7 @@ export async function checkForDuplicates(
       similarDocuments.push({
         id: doc.id,
         title: doc.title,
+        description: doc.description,
         category: doc.category,
         similarity: Math.max(titleSimilarity, descriptionSimilarity)
       })
@@ -134,7 +137,7 @@ export async function validateDocumentUniqueness(
   description: string,
   category: string,
   excludeId?: string
-): Promise<{ isValid: boolean; error?: string; suggestions?: any[] }> {
+): Promise<{ isValid: boolean; error?: string; suggestions?: Array<{ id: string; title: string; description: string; category: string; similarity: number }> }> {
   try {
     const duplicateCheck = await checkForDuplicates(title, description, category, excludeId)
     

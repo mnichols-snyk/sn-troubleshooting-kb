@@ -46,7 +46,7 @@ export function EditDocumentModal({ isOpen, onClose, onSuccess, document }: Edit
   const [removeImage, setRemoveImage] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [duplicateSuggestions, setDuplicateSuggestions] = useState<any[]>([])
+  const [duplicateSuggestions, setDuplicateSuggestions] = useState<Array<{ id: string; title: string; description: string; category: string; similarity: number }>>([])
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false)
 
   // Populate form when document changes
@@ -106,7 +106,7 @@ export function EditDocumentModal({ isOpen, onClose, onSuccess, document }: Edit
         } else if (result.details) {
           // Handle Zod validation errors
           const fieldErrors: Record<string, string> = {}
-          result.details.forEach((error: any) => {
+          result.details.forEach((error: { path: string[]; message: string }) => {
             fieldErrors[error.path[0]] = error.message
           })
           setErrors(fieldErrors)
@@ -123,8 +123,8 @@ export function EditDocumentModal({ isOpen, onClose, onSuccess, document }: Edit
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {}
-        error.issues.forEach((err: any) => {
-          fieldErrors[err.path[0] as string] = err.message
+        error.issues.forEach((err) => {
+          fieldErrors[String(err.path[0])] = err.message
         })
         setErrors(fieldErrors)
       } else {
@@ -192,7 +192,7 @@ export function EditDocumentModal({ isOpen, onClose, onSuccess, document }: Edit
                     <div className="mt-3">
                       <p className="font-medium">Similar documents:</p>
                       <ul className="mt-1 space-y-1">
-                        {duplicateSuggestions.map((suggestion: any, index: number) => (
+                        {duplicateSuggestions.map((suggestion, index: number) => (
                           <li key={index} className="text-xs bg-amber-100 px-2 py-1 rounded">
                             <strong>{suggestion.title}</strong> - {suggestion.description.substring(0, 100)}...
                           </li>

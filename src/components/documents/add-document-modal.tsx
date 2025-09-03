@@ -36,7 +36,7 @@ export function AddDocumentModal({ isOpen, onClose, onSuccess }: AddDocumentModa
   const [image, setImage] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [duplicateSuggestions, setDuplicateSuggestions] = useState<any[]>([])
+  const [duplicateSuggestions, setDuplicateSuggestions] = useState<Array<{ id: string; title: string; description: string; category: string; similarity: number }>>([])
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,7 +74,7 @@ export function AddDocumentModal({ isOpen, onClose, onSuccess }: AddDocumentModa
         } else if (result.details) {
           // Handle Zod validation errors
           const fieldErrors: Record<string, string> = {}
-          result.details.forEach((error: any) => {
+          result.details.forEach((error: { path: string[]; message: string }) => {
             fieldErrors[error.path[0]] = error.message
           })
           setErrors(fieldErrors)
@@ -95,8 +95,8 @@ export function AddDocumentModal({ isOpen, onClose, onSuccess }: AddDocumentModa
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {}
-        error.issues.forEach((err: any) => {
-          fieldErrors[err.path[0] as string] = err.message
+        error.issues.forEach((err) => {
+          fieldErrors[String(err.path[0])] = err.message
         })
         setErrors(fieldErrors)
       } else {
@@ -166,7 +166,7 @@ export function AddDocumentModal({ isOpen, onClose, onSuccess }: AddDocumentModa
                   <div className="mt-3">
                     <p className="text-sm font-medium mb-2">Similar documents found:</p>
                     <div className="space-y-2">
-                      {duplicateSuggestions.slice(0, 3).map((suggestion, index) => (
+                      {duplicateSuggestions.slice(0, 3).map((suggestion) => (
                         <div key={suggestion.id} className="bg-yellow-100 p-2 rounded text-xs">
                           <p className="font-medium">{suggestion.title}</p>
                           <p className="text-yellow-700">Category: {suggestion.category}</p>

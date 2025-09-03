@@ -15,13 +15,13 @@ const updateDocumentSchema = z.object({
 })
 
 interface RouteParams {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 // GET - Fetch single document
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const document = await prisma.document.findUnique({
       where: { id },
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT - Update document
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions) as any
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(
@@ -71,7 +71,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const { id } = params
+    const { id } = await params
 
     // Check if document exists and user owns it or is admin
     const existingDocument = await prisma.document.findUnique({
@@ -171,7 +171,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       const uploadsDir = join(process.cwd(), 'uploads')
       try {
         await mkdir(uploadsDir, { recursive: true })
-      } catch (mkdirError) {
+      } catch {
         // Directory might already exist
       }
 
@@ -229,7 +229,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE - Delete document
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions) as any
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
       return NextResponse.json(
@@ -245,7 +245,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const { id } = params
+    const { id } = await params
 
     // Check if document exists
     const existingDocument = await prisma.document.findUnique({
