@@ -54,7 +54,8 @@ export default function Home() {
                 <div className="flex space-x-2">
                   <Link
                     href="/auth/signin"
-                    className="text-sm text-white hover:text-gray-200 transition-colors"
+                    className="snyk-button-secondary text-sm"
+                    style={{background: 'var(--snyk-white)', color: 'var(--snyk-primary)'}}
                   >
                     Sign In
                   </Link>
