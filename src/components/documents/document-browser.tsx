@@ -267,11 +267,19 @@ interface DocumentCardProps {
 function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Only expand if clicking on the card itself, not on action buttons
+    const target = e.target as HTMLElement
+    if (!target.closest('button[data-action]')) {
+      setIsExpanded(!isExpanded)
+    }
+  }
+
   return (
     <div className="snyk-card mb-4 overflow-hidden">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 text-left transition-colors"
+      <div
+        onClick={handleCardClick}
+        className="w-full px-4 py-3 cursor-pointer transition-colors"
         style={{
           background: 'var(--snyk-gray-50)'
         }}
@@ -284,6 +292,7 @@ function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProp
             {isEditor && (
               <>
                 <button
+                  data-action="edit"
                   onClick={(e) => {
                     e.stopPropagation()
                     onEdit?.()
@@ -299,6 +308,7 @@ function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProp
                   </svg>
                 </button>
                 <button
+                  data-action="delete"
                   onClick={(e) => {
                     e.stopPropagation()
                     onDelete?.()
@@ -328,7 +338,7 @@ function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProp
             </svg>
           </div>
         </div>
-      </button>
+      </div>
       
       {isExpanded && (
         <div className="px-4 py-3" style={{background: 'var(--snyk-white)'}}>
