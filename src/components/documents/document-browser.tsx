@@ -101,9 +101,18 @@ export default function DocumentBrowser({ onRefresh: _onRefresh, refreshTrigger 
       )
     : documents
 
+  // Group filtered documents by category for search results
+  const filteredDocumentsByCategory = filteredDocuments.reduce((acc, doc) => {
+    if (!acc[doc.category]) {
+      acc[doc.category] = []
+    }
+    acc[doc.category].push(doc)
+    return acc
+  }, {} as Record<string, typeof documents>)
+
   // Find first category with search results
   const searchResultCategory = searchQuery && filteredDocuments.length > 0
-    ? Object.keys(filteredDocuments).find(category => filteredDocuments[category].length > 0)
+    ? Object.keys(filteredDocumentsByCategory).find(category => filteredDocumentsByCategory[category].length > 0)
     : activeTab
 
   if (loading) {
@@ -140,7 +149,7 @@ export default function DocumentBrowser({ onRefresh: _onRefresh, refreshTrigger 
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No documents yet</h3>
         <p className="text-gray-500">
-          {session?.user?.role === 'EDITOR' 
+          {(session?.user as any)?.role === 'EDITOR' 
             ? 'Create your first document using the + button above.'
             : 'Check back later for troubleshooting documentation.'
           }
@@ -224,7 +233,7 @@ export default function DocumentBrowser({ onRefresh: _onRefresh, refreshTrigger 
                   document={doc} 
                   onEdit={() => setEditingDocument(doc)}
                   onDelete={() => setDeletingDocument(doc)}
-                  isEditor={session?.user?.role === 'EDITOR'}
+                  isEditor={(session?.user as any)?.role === 'EDITOR'}
                 />
               ))}
             </div>

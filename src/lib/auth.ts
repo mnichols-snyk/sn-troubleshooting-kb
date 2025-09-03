@@ -13,8 +13,7 @@ const loginSchema = z.object({
   password: z.string().min(6),
 })
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const authOptions: any = {
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -54,7 +53,7 @@ export const authOptions: any = {
     })
   ],
   session: {
-    strategy: 'jwt',
+    strategy: 'jwt' as const,
   },
   callbacks: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,7 +67,7 @@ export const authOptions: any = {
     async session({ session, token }: any) {
       if (token) {
         session.user.id = token.sub
-        session.user.role = token.role as string
+        session.user.role = token.role
       }
       return session
     },

@@ -15,6 +15,60 @@ export default function ForgotPassword() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [resetUrl, setResetUrl] = useState<string | null>(null)
 
+  // Validate and sanitize the reset URL with enhanced security
+  const getSafeResetUrl = (url: string | null): string | null => {
+    if (!url || typeof url !== 'string') return null
+    
+    // Remove any potential HTML/JS injection attempts
+    const cleanUrl = url.replace(/[<>"']/g, '')
+    
+    try {
+      const parsedUrl = new URL(cleanUrl)
+      
+      // Strict protocol validation - only allow https in production, http in development
+      const allowedProtocols = process.env.NODE_ENV === 'development' 
+        ? ['http:', 'https:'] 
+        : ['https:']
+      
+      if (!allowedProtocols.includes(parsedUrl.protocol)) {
+        return null
+      }
+      
+      // Strict hostname validation
+      const allowedHosts = process.env.NODE_ENV === 'development'
+        ? ['localhost', '127.0.0.1', '0.0.0.0']
+        : [new URL(process.env.NEXTAUTH_URL || '').hostname].filter(Boolean)
+      
+      if (!allowedHosts.includes(parsedUrl.hostname)) {
+        return null
+      }
+      
+      // Ensure the path starts with expected reset path
+      if (!parsedUrl.pathname.startsWith('/auth/reset-password')) {
+        return null
+      }
+      
+      return parsedUrl.toString()
+    } catch {
+      return null
+    }
+  }
+
+  // Get sanitized URL for display and navigation
+  const safeResetUrl = resetUrl ? getSafeResetUrl(resetUrl) : null
+  
+  // Create a safe display version that breaks the direct data flow
+  const getDisplayToken = (url: string | null): string => {
+    if (!url) return ''
+    try {
+      const parsedUrl = new URL(url)
+      const token = parsedUrl.searchParams.get('token')
+      return token ? `${token.substring(0, 8)}...` : 'Invalid token'
+    } catch {
+      return 'Invalid URL'
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -74,17 +128,23 @@ export default function ForgotPassword() {
               If an account with that email exists, we have sent a password reset link to your email address.
             </p>
             
-            {resetUrl && (
+            {safeResetUrl && (
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-6">
                 <p className="text-yellow-400 text-sm mb-2">Development Mode - Reset Link:</p>
-                <a 
-                  href={resetUrl} 
-                  className="text-yellow-300 text-sm break-all hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => {
+                    if (safeResetUrl) {
+                      window.open(safeResetUrl, '_blank', 'noopener,noreferrer')
+                    }
+                  }}
+                  className="text-yellow-300 text-sm break-all hover:underline bg-transparent border-none cursor-pointer p-0 text-left"
                 >
-                  {resetUrl}
-                </a>
+                  Click to open reset link
+                </button>
+                <div className="mt-2 text-xs text-yellow-500 font-mono break-all">
+                  {/* Display only the token part for verification, not the full URL */}
+                  Token: {getDisplayToken(safeResetUrl)}
+                </div>
               </div>
             )}
 
