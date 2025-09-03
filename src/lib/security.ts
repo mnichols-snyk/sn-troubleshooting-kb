@@ -27,7 +27,8 @@ export async function validateAuthentication(): Promise<SecurityValidationResult
       isValid: true,
       user: session.user
     }
-  } catch (_error) {
+  } catch {
+    // Validation failed - return error result
     return {
       isValid: false,
       error: 'Authentication validation failed'
@@ -38,21 +39,18 @@ export async function validateAuthentication(): Promise<SecurityValidationResult
 /**
  * Validates that the user has Editor role
  */
-export async function validateEditorRole(_request: NextRequest): Promise<SecurityValidationResult> {
+export async function validateRequest(): Promise<boolean> {
   const authResult = await validateAuthentication()
   
   if (!authResult.isValid) {
-    return authResult
+    return false
   }
 
   if (authResult.user.role !== 'EDITOR') {
-    return {
-      isValid: false,
-      error: 'Editor role required'
-    }
+    return false
   }
 
-  return authResult
+  return true
 }
 
 /**

@@ -11,7 +11,7 @@ interface MarkdownRendererProps {
 export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
   const renderedContent = useMemo(() => {
     // Simple markdown parser with security focus
-    let html = content
+    const html = content
       // Escape HTML first
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')

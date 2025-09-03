@@ -57,7 +57,7 @@ export default function DocumentBrowser({ refreshTrigger }: DocumentBrowserProps
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [activeTab])
 
   useEffect(() => {
     fetchDocuments()

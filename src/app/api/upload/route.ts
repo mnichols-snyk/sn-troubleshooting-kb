@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Only editors can upload images
-    if ((session.user as any).role !== 'EDITOR') {
+    if ((session.user as { role?: string }).role !== 'EDITOR') {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
 
@@ -122,8 +122,8 @@ export async function POST(request: NextRequest) {
       size: file.size
     })
 
-  } catch (error) {
-    console.error('File upload error:', error)
+  } catch (uploadError) {
+    console.error('File upload error:', uploadError)
     return NextResponse.json({ 
       error: 'Failed to upload file' 
     }, { status: 500 })

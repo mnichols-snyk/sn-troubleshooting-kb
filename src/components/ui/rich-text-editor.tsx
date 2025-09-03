@@ -11,12 +11,6 @@ interface RichTextEditorProps {
   error?: string
 }
 
-interface UploadedImage {
-  url: string
-  filename: string
-  originalName: string
-}
-
 const imageUploadSchema = z.object({
   url: z.string(),
   filename: z.string(),
