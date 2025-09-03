@@ -6,8 +6,9 @@ import { authOptions } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filename: string } }
+  { params }: { params: Promise<{ filename: string }> }
 ) {
+  const { filename } = await params
   try {
     // Check authentication for file access
     const session = await getServerSession(authOptions)
@@ -15,7 +16,6 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { filename } = params
 
     // Security: Validate filename to prevent path traversal
     if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
