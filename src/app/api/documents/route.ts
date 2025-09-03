@@ -93,7 +93,6 @@ export async function POST(request: NextRequest) {
     }
 
     let imageUrl: string | null = null
-    let imagePath: string | null = null
 
     // Handle image upload if provided
     if (image && image.size > 0) {
@@ -133,7 +132,7 @@ export async function POST(request: NextRequest) {
       await writeFile(filepath, buffer)
 
       imageUrl = `/uploads/${filename}`
-      imagePath = filepath // Used for cleanup on document deletion
+      // imagePath = filepath // Used for cleanup on document deletion - TODO: implement cleanup
     }
 
     // Create document in database

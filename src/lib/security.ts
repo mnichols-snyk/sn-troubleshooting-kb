@@ -12,7 +12,7 @@ export interface SecurityValidationResult {
 /**
  * Validates that the user is authenticated
  */
-export async function validateAuthentication(_request: NextRequest): Promise<SecurityValidationResult> {
+export async function validateAuthentication(): Promise<SecurityValidationResult> {
   try {
     const session = await getServerSession(authOptions)
     
@@ -38,8 +38,8 @@ export async function validateAuthentication(_request: NextRequest): Promise<Sec
 /**
  * Validates that the user has Editor role
  */
-export async function validateEditorRole(request: NextRequest): Promise<SecurityValidationResult> {
-  const authResult = await validateAuthentication(request)
+export async function validateEditorRole(_request: NextRequest): Promise<SecurityValidationResult> {
+  const authResult = await validateAuthentication()
   
   if (!authResult.isValid) {
     return authResult

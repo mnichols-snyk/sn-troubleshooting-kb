@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Modal } from '@/components/ui/modal'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { z } from 'zod'
 
 interface Document {
@@ -21,7 +22,7 @@ interface EditDocumentModalProps {
 
 const documentSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
+  description: z.string().min(1, 'Steps are required'),
   category: z.string().min(1, 'Category is required'),
 })
 
@@ -42,8 +43,6 @@ export function EditDocumentModal({ isOpen, onClose, onSuccess, document }: Edit
     description: '',
     category: '',
   })
-  const [image, setImage] = useState<File | null>(null)
-  const [removeImage, setRemoveImage] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [duplicateSuggestions, setDuplicateSuggestions] = useState<Array<{ id: string; title: string; description: string; category: string; similarity: number }>>([])
@@ -57,8 +56,6 @@ export function EditDocumentModal({ isOpen, onClose, onSuccess, document }: Edit
         description: document.description,
         category: document.category,
       })
-      setImage(null)
-      setRemoveImage(false)
       setErrors({})
       setDuplicateSuggestions([])
       setShowDuplicateWarning(false)
@@ -82,13 +79,6 @@ export function EditDocumentModal({ isOpen, onClose, onSuccess, document }: Edit
       submitData.append('description', formData.description)
       submitData.append('category', formData.category)
       
-      if (image) {
-        submitData.append('image', image)
-      }
-      
-      if (removeImage) {
-        submitData.append('removeImage', 'true')
-      }
 
       const response = await fetch(`/api/documents/${document.id}`, {
         method: 'PUT',
@@ -143,27 +133,6 @@ export function EditDocumentModal({ isOpen, onClose, onSuccess, document }: Edit
     }
   }
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-      if (!allowedTypes.includes(file.type)) {
-        setErrors({ image: 'Only JPEG, PNG, GIF, and WebP images are allowed' })
-        return
-      }
-      
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors({ image: 'File size must be less than 5MB' })
-        return
-      }
-      
-      setImage(file)
-      setRemoveImage(false) // Cancel remove if uploading new image
-      setErrors(prev => ({ ...prev, image: '' }))
-    }
-  }
 
   if (!document) return null
 
@@ -250,83 +219,20 @@ export function EditDocumentModal({ isOpen, onClose, onSuccess, document }: Edit
           )}
         </div>
 
-        {/* Description Textarea */}
+        {/* Rich Text Steps */}
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-            Description *
+            Steps *
           </label>
-          <textarea
-            id="description"
+          <RichTextEditor
             value={formData.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
-            rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter detailed description or instructions"
-            required
+            onChange={(value) => handleInputChange('description', value)}
+            placeholder="Enter step-by-step instructions with formatting and images..."
+            disabled={isSubmitting}
+            error={errors.description}
           />
-          {errors.description && (
-            <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-          )}
         </div>
 
-        {/* Current Image Display */}
-        {document.imageUrl && !removeImage && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Current Image
-            </label>
-            <div className="relative">
-              <img
-                src={document.imageUrl}
-                alt={document.title}
-                className="max-w-xs h-auto rounded-md border border-gray-200"
-              />
-              <button
-                type="button"
-                onClick={() => setRemoveImage(true)}
-                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Image Removal Notice */}
-        {removeImage && (
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
-            <p className="text-sm">Image will be removed when you save.</p>
-            <button
-              type="button"
-              onClick={() => setRemoveImage(false)}
-              className="text-sm underline hover:no-underline"
-            >
-              Keep image
-            </button>
-          </div>
-        )}
-
-        {/* File Upload */}
-        <div>
-          <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
-            {document.imageUrl && !removeImage ? 'Replace Image' : 'Add Image'} (Optional)
-          </label>
-          <input
-            type="file"
-            id="image"
-            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-            onChange={handleImageChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          {image && (
-            <p className="mt-1 text-sm text-gray-600">
-              New image: {image.name} ({(image.size / 1024 / 1024).toFixed(2)} MB)
-            </p>
-          )}
-          {errors.image && (
-            <p className="mt-1 text-sm text-red-600">{errors.image}</p>
-          )}
-        </div>
 
         {/* Submit Button */}
         <div className="flex justify-end space-x-3 pt-4">

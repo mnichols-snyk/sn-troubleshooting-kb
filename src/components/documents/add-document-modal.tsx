@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Modal } from '@/components/ui/modal'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { z } from 'zod'
 
 interface AddDocumentModalProps {
@@ -12,7 +13,7 @@ interface AddDocumentModalProps {
 
 const documentSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
+  description: z.string().min(1, 'Steps are required'),
   category: z.string().min(1, 'Category is required'),
 })
 
@@ -33,7 +34,6 @@ export function AddDocumentModal({ isOpen, onClose, onSuccess }: AddDocumentModa
     description: '',
     category: '',
   })
-  const [image, setImage] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [duplicateSuggestions, setDuplicateSuggestions] = useState<Array<{ id: string; title: string; description: string; category: string; similarity: number }>>([])
@@ -54,9 +54,6 @@ export function AddDocumentModal({ isOpen, onClose, onSuccess }: AddDocumentModa
       submitData.append('description', formData.description)
       submitData.append('category', formData.category)
       
-      if (image) {
-        submitData.append('image', image)
-      }
 
       const response = await fetch('/api/documents', {
         method: 'POST',
@@ -86,7 +83,6 @@ export function AddDocumentModal({ isOpen, onClose, onSuccess }: AddDocumentModa
 
       // Success - reset form and close modal
       setFormData({ title: '', description: '', category: '' })
-      setImage(null)
       setDuplicateSuggestions([])
       setShowDuplicateWarning(false)
       onSuccess()
@@ -115,26 +111,6 @@ export function AddDocumentModal({ isOpen, onClose, onSuccess }: AddDocumentModa
     }
   }
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-      if (!allowedTypes.includes(file.type)) {
-        setErrors({ image: 'Only JPEG, PNG, GIF, and WebP images are allowed' })
-        return
-      }
-      
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors({ image: 'File size must be less than 5MB' })
-        return
-      }
-      
-      setImage(file)
-      setErrors(prev => ({ ...prev, image: '' }))
-    }
-  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add New Documentation">
@@ -227,46 +203,20 @@ export function AddDocumentModal({ isOpen, onClose, onSuccess }: AddDocumentModa
           )}
         </div>
 
-        {/* Description Textarea */}
+        {/* Rich Text Steps */}
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-            Description *
+            Steps *
           </label>
-          <textarea
-            id="description"
+          <RichTextEditor
             value={formData.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
-            rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter detailed description or instructions"
-            required
+            onChange={(value) => handleInputChange('description', value)}
+            placeholder="Enter step-by-step instructions with formatting and images..."
+            disabled={isSubmitting}
+            error={errors.description}
           />
-          {errors.description && (
-            <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-          )}
         </div>
 
-        {/* File Upload */}
-        <div>
-          <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
-            Screenshot (Optional)
-          </label>
-          <input
-            type="file"
-            id="image"
-            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-            onChange={handleImageChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          {image && (
-            <p className="mt-1 text-sm text-gray-600">
-              Selected: {image.name} ({(image.size / 1024 / 1024).toFixed(2)} MB)
-            </p>
-          )}
-          {errors.image && (
-            <p className="mt-1 text-sm text-red-600">{errors.image}</p>
-          )}
-        </div>
 
         {/* Submit Button */}
         <div className="flex justify-end space-x-3 pt-4">

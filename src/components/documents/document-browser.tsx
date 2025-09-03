@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { EditDocumentModal } from './edit-document-modal'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
 
 interface Document {
   id: string
@@ -23,7 +24,7 @@ interface DocumentBrowserProps {
   refreshTrigger?: number
 }
 
-export default function DocumentBrowser({ onRefresh: _onRefresh, refreshTrigger }: DocumentBrowserProps) {
+export default function DocumentBrowser({ refreshTrigger }: DocumentBrowserProps) {
   const { data: session } = useSession()
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,7 +34,7 @@ export default function DocumentBrowser({ onRefresh: _onRefresh, refreshTrigger 
   const [editingDocument, setEditingDocument] = useState<Document | null>(null)
   const [deletingDocument, setDeletingDocument] = useState<Document | null>(null)
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch('/api/documents')
@@ -56,11 +57,11 @@ export default function DocumentBrowser({ onRefresh: _onRefresh, refreshTrigger 
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchDocuments()
-  }, [refreshTrigger])
+  }, [refreshTrigger, fetchDocuments])
 
   const handleDelete = async (document: Document) => {
     try {
@@ -102,18 +103,18 @@ export default function DocumentBrowser({ onRefresh: _onRefresh, refreshTrigger 
     : documents
 
   // Group filtered documents by category for search results
-  const filteredDocumentsByCategory = filteredDocuments.reduce((acc, doc) => {
-    if (!acc[doc.category]) {
-      acc[doc.category] = []
-    }
-    acc[doc.category].push(doc)
-    return acc
-  }, {} as Record<string, typeof documents>)
+  // const filteredDocumentsByCategory = filteredDocuments.reduce((acc, doc) => {
+  //   if (!acc[doc.category]) {
+  //     acc[doc.category] = []
+  //   }
+  //   acc[doc.category].push(doc)
+  //   return acc
+  // }, {} as Record<string, typeof documents>)
 
   // Find first category with search results
-  const searchResultCategory = searchQuery && filteredDocuments.length > 0
-    ? Object.keys(filteredDocumentsByCategory).find(category => filteredDocumentsByCategory[category].length > 0)
-    : activeTab
+  // const searchResultCategory = searchQuery && filteredDocuments.length > 0
+  //   ? Object.keys(filteredDocumentsByCategory).find(category => filteredDocumentsByCategory[category].length > 0)
+  //   : activeTab
 
   if (loading) {
     return (
@@ -351,21 +352,22 @@ function DocumentCard({ document, onEdit, onDelete, isEditor }: DocumentCardProp
       
       {isExpanded && (
         <div className="px-4 py-3" style={{background: 'var(--snyk-white)'}}>
-          <div className="prose prose-sm max-w-none">
-            <p className="whitespace-pre-wrap" style={{color: 'var(--snyk-gray-700)'}}>{document.description}</p>
-            
-            {document.imageUrl && (
-              <div className="mt-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={document.imageUrl}
-                  alt={document.title}
-                  className="max-w-full h-auto rounded-md"
-                  style={{border: '1px solid var(--snyk-gray-200)'}}
-                />
-              </div>
-            )}
-          </div>
+          <MarkdownRenderer 
+            content={document.description}
+            className="max-w-none"
+          />
+          
+          {document.imageUrl && (
+            <div className="mt-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={document.imageUrl}
+                alt={document.title}
+                className="max-w-full h-auto rounded-md"
+                style={{border: '1px solid var(--snyk-gray-200)'}}
+              />
+            </div>
+          )}
           
           <div className="mt-4 pt-3 text-xs" style={{borderTop: '1px solid var(--snyk-gray-100)', color: 'var(--snyk-gray-500)'}}>
             Created by {document.author.name || document.author.email} on{' '}
