@@ -35,14 +35,20 @@ export default function Home() {
                 <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
               ) : session ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-white">
-                    Welcome, {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-                    (session.user as any).name || (session.user as any).email}
+                  <span className="text-white">
+                    {(session.user as any).name || (session.user as any).email}
                     <span className="ml-1 snyk-badge snyk-badge-success">
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-                      (session.user as any).role}
+                      {(session.user as any).role}
                     </span>
                   </span>
+                  {(session.user as any).role === 'EDITOR' && (
+                    <Link
+                      href="/admin/users"
+                      className="text-sm text-white hover:text-gray-200 transition-colors"
+                    >
+                      Manage Users
+                    </Link>
+                  )}
                   <button
                     onClick={() => signOut()}
                     className="text-sm text-white hover:text-gray-200 transition-colors"
