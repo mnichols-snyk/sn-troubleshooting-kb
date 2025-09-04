@@ -17,28 +17,70 @@ const createDocumentSchema = z.object({
 // GET - Fetch all documents (public endpoint)
 export async function GET() {
   try {
-    const documents = await prisma.document.findMany({
-      where: {
-        published: true,
-      },
-      include: {
-        author: {
-          select: {
-            name: true,
-            email: true,
+    // Add connection timeout and retry logic
+    const documents = await Promise.race([
+      prisma.document.findMany({
+        where: {
+          published: true,
+        },
+        include: {
+          author: {
+            select: {
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-      orderBy: [
-        { category: 'asc' },
-        { sortOrder: 'asc' },
-        { createdAt: 'desc' },
-      ],
-    })
+        orderBy: [
+          { category: 'asc' },
+          { sortOrder: 'asc' },
+          { createdAt: 'desc' },
+        ],
+      }),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database query timeout')), 10000)
+      )
+    ])
 
     return NextResponse.json(documents)
   } catch (error) {
     console.error('Error fetching documents:', error)
+    
+    // Try to disconnect and reconnect on timeout
+    if (error instanceof Error && error.message.includes('timeout')) {
+      try {
+        await prisma.$disconnect()
+        await prisma.$connect()
+        
+        // Retry with simpler query
+        const documents = await prisma.document.findMany({
+          where: { published: true },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            category: true,
+            createdAt: true,
+            updatedAt: true,
+            author: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: [
+            { category: 'asc' },
+            { createdAt: 'desc' },
+          ],
+        })
+        
+        return NextResponse.json(documents)
+      } catch (retryError) {
+        console.error('Retry failed:', retryError)
+      }
+    }
+    
     return NextResponse.json(
       { error: 'Failed to fetch documents' },
       { status: 500 }
