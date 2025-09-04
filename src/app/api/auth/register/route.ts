@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -12,6 +14,23 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if user is authenticated and has EDITOR role
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    if (session.user.role !== 'EDITOR') {
+      return NextResponse.json(
+        { error: 'Only administrators can create new accounts' },
+        { status: 403 }
+      )
+    }
+
     const body = await request.json()
     const { email, password, name, role } = registerSchema.parse(body)
 

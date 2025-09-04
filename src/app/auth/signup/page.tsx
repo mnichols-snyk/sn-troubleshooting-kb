@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { z } from 'zod'
 
@@ -17,6 +18,7 @@ const registerSchema = z.object({
 })
 
 export default function SignUp() {
+  const { data: session, status } = useSession()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -27,6 +29,20 @@ export default function SignUp() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'loading') return // Still loading
+
+    if (!session) {
+      router.push('/auth/signin?message=Please sign in to access this page')
+      return
+    }
+
+    if (session.user.role !== 'EDITOR') {
+      router.push('/?message=Access denied. Only administrators can create accounts.')
+      return
+    }
+  }, [session, status, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -75,8 +91,8 @@ export default function SignUp() {
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-slate-800 rounded-lg shadow-lg p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">Sign Up</h1>
-          <p className="text-slate-400 mt-2">Create your Knowledge Base account</p>
+          <h1 className="text-3xl font-bold text-white">Create New User</h1>
+          <p className="text-slate-400 mt-2">Add a new user to the Knowledge Base (Admin Only)</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -170,15 +186,14 @@ export default function SignUp() {
             disabled={isLoading}
             className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 text-white font-medium py-2 px-4 rounded-lg transition-colors"
           >
-            {isLoading ? 'Creating account...' : 'Sign Up'}
+            {isLoading ? 'Creating user...' : 'Create User'}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-slate-400">
-            Already have an account?{' '}
-            <Link href="/auth/signin" className="text-indigo-400 hover:text-indigo-300">
-              Sign in
+            <Link href="/" className="text-indigo-400 hover:text-indigo-300">
+              ← Back to Knowledge Base
             </Link>
           </p>
         </div>

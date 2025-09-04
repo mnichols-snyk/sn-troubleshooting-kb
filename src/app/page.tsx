@@ -59,13 +59,6 @@ export default function Home() {
                   >
                     Sign In
                   </Link>
-                  <Link
-                    href="/auth/signup"
-                    className="snyk-button-secondary text-sm"
-                    style={{background: 'var(--snyk-white)', color: 'var(--snyk-primary)'}}
-                  >
-                    Sign Up
-                  </Link>
                 </div>
               )}
             </div>

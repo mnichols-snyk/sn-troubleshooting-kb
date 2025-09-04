@@ -137,10 +137,7 @@ export default function SignIn() {
             </Link>
           </div>
           <p className="text-slate-400">
-            Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="text-indigo-400 hover:text-indigo-300">
-              Sign up
-            </Link>
+            Need help? Contact your administrator for account access.
           </p>
         </div>
       </div>
