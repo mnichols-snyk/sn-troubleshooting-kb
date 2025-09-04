@@ -17,6 +17,9 @@ const createDocumentSchema = z.object({
 // GET - Fetch all documents (public endpoint)
 export async function GET() {
   try {
+    console.log('Production debug - DATABASE_URL exists:', !!process.env.DATABASE_URL)
+    console.log('Production debug - NODE_ENV:', process.env.NODE_ENV)
+    
     const documents = await prisma.document.findMany({
       where: { published: true },
       include: {
@@ -34,11 +37,17 @@ export async function GET() {
       ],
     })
 
+    console.log('Production debug - Found documents:', documents.length)
     return NextResponse.json(documents)
   } catch (error) {
-    console.error('Error fetching documents:', error)
+    console.error('Production error fetching documents:', error)
+    console.error('Error name:', error instanceof Error ? error.name : 'Unknown')
+    console.error('Error message:', error instanceof Error ? error.message : 'Unknown')
     return NextResponse.json(
-      { error: 'Failed to fetch documents' },
+      { 
+        error: 'Failed to fetch documents',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
