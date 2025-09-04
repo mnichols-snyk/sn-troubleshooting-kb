@@ -90,3 +90,4 @@ uploads/
 postgres_data/
 .vercel
 .env*.local
+.env.production*
