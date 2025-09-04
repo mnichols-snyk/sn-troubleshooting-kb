@@ -36,12 +36,12 @@ export default function Home() {
               ) : session ? (
                 <div className="flex items-center space-x-4">
                   <span className="text-white">
-                    {(session.user as any).name || (session.user as any).email}
+                    {session.user.name || session.user.email}
                     <span className="ml-1 snyk-badge snyk-badge-success">
-                      {(session.user as any).role}
+                      {session.user.role}
                     </span>
                   </span>
-                  {(session.user as any).role === 'EDITOR' && (
+                  {session.user.role === 'EDITOR' && (
                     <Link
                       href="/admin/users"
                       className="text-sm text-white hover:text-gray-200 transition-colors"
