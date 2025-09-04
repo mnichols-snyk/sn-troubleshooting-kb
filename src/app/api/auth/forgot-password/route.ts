@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { findUserByEmail, createPasswordResetToken } from '@/lib/db-direct'
 import { z } from 'zod'
 import { randomBytes } from 'crypto'
 
@@ -13,9 +13,7 @@ export async function POST(request: NextRequest) {
     const { email } = forgotPasswordSchema.parse(body)
 
     // Check if user exists
-    const user = await prisma.user.findUnique({
-      where: { email }
-    })
+    const user = await findUserByEmail(email)
 
     if (!user) {
       // Return success even if user doesn't exist for security
@@ -29,13 +27,7 @@ export async function POST(request: NextRequest) {
     const expires = new Date(Date.now() + 3600000) // 1 hour from now
 
     // Store reset token in database
-    await prisma.passwordResetToken.create({
-      data: {
-        email,
-        token: resetToken,
-        expires,
-      }
-    })
+    await createPasswordResetToken(email, resetToken, expires)
 
     // In a real application, you would send an email here
     // For now, we'll just log the reset link

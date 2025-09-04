@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
+import { getDocuments } from '@/lib/db-direct'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { validateDocumentUniqueness } from '@/lib/duplicate-validation'
@@ -20,22 +21,16 @@ export async function GET() {
     console.log('Production debug - DATABASE_URL exists:', !!process.env.DATABASE_URL)
     console.log('Production debug - NODE_ENV:', process.env.NODE_ENV)
     
-    const documents = await prisma.document.findMany({
-      where: { published: true },
-      include: {
-        author: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: [
-        { category: 'asc' },
-        { sortOrder: 'asc' },
-        { createdAt: 'desc' },
-      ],
-    })
+    const rawDocuments = await getDocuments()
+
+    // Transform the data to match expected frontend structure
+    const documents = rawDocuments.map(doc => ({
+      ...doc,
+      author: {
+        name: doc.authorName,
+        email: doc.authorEmail
+      }
+    }))
 
     console.log('Production debug - Found documents:', documents.length)
     return NextResponse.json(documents)

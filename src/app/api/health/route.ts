@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getDocumentCount } from '@/lib/db-direct'
 
 export async function GET() {
   try {
-    // Test database connection
-    await prisma.$connect()
-    
-    // Simple count query
-    const documentCount = await prisma.document.count()
+    const documentCount = await getDocumentCount()
     
     return NextResponse.json({
       status: 'ok',
@@ -18,6 +14,7 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Health check failed:', error)
+    
     return NextResponse.json({
       status: 'error',
       database: 'disconnected',

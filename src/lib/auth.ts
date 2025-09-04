@@ -1,7 +1,7 @@
 export { getServerSession } from 'next-auth/next'
 import type { AuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { prisma } from './prisma'
+import { findUserByEmail } from './db-direct'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
@@ -25,9 +25,7 @@ export const authOptions: AuthOptions = {
 
         const { email, password } = loginSchema.parse(credentials)
 
-        const user = await prisma.user.findUnique({
-          where: { email }
-        })
+        const user = await findUserByEmail(email)
 
         if (!user) {
           return null
